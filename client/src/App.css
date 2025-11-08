@@ -69,6 +69,24 @@ body {
   background-color: #1d4ed8;
 }
 
+.profile-icon {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.profile-icon:hover {
+  background-color: #1d4ed8;
+  transform: scale(1.05);
+}
+
 /* Hero */
 .hero {
   text-align: center;
