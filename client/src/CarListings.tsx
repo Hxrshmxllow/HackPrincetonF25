@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./CarListings.css";
 
 interface Car {
@@ -9,6 +9,7 @@ interface Car {
   price: number;
   mileage: number;
   image: string;
+  images: string[];
   location: string;
   description: string;
   insuranceEstimate: number;
@@ -24,6 +25,13 @@ const mockCars: Car[] = [
     price: 41999,
     mileage: 12000,
     image: "https://source.unsplash.com/1000x700/?tesla,car",
+    images: [
+      "https://source.unsplash.com/1200x800/?tesla,model3,exterior",
+      "https://source.unsplash.com/1200x800/?tesla,model3,interior",
+      "https://source.unsplash.com/1200x800/?tesla,model3,front",
+      "https://source.unsplash.com/1200x800/?tesla,model3,side",
+      "https://source.unsplash.com/1200x800/?tesla,model3,back",
+    ],
     location: "Newark, NJ",
     description:
       "The Tesla Model 3 offers cutting-edge EV performance with minimal maintenance and high resale value.",
@@ -39,6 +47,12 @@ const mockCars: Car[] = [
     price: 23999,
     mileage: 28000,
     image: "https://source.unsplash.com/1000x700/?toyota,camry",
+    images: [
+      "https://source.unsplash.com/1200x800/?toyota,camry,exterior",
+      "https://source.unsplash.com/1200x800/?toyota,camry,interior",
+      "https://source.unsplash.com/1200x800/?toyota,camry,front",
+      "https://source.unsplash.com/1200x800/?toyota,camry,side",
+    ],
     location: "Edison, NJ",
     description:
       "A dependable midsize sedan known for comfort, fuel efficiency, and long-term reliability.",
@@ -54,6 +68,13 @@ const mockCars: Car[] = [
     price: 20999,
     mileage: 18000,
     image: "https://source.unsplash.com/1000x700/?honda,civic",
+    images: [
+      "https://source.unsplash.com/1200x800/?honda,civic,exterior",
+      "https://source.unsplash.com/1200x800/?honda,civic,interior",
+      "https://source.unsplash.com/1200x800/?honda,civic,front",
+      "https://source.unsplash.com/1200x800/?honda,civic,side",
+      "https://source.unsplash.com/1200x800/?honda,civic,back",
+    ],
     location: "Princeton, NJ",
     description:
       "Popular among new buyers for its smooth ride, solid build, and great resale value.",
@@ -69,6 +90,13 @@ const mockCars: Car[] = [
     price: 32999,
     mileage: 36000,
     image: "https://source.unsplash.com/1000x700/?bmw,car",
+    images: [
+      "https://source.unsplash.com/1200x800/?bmw,3series,exterior",
+      "https://source.unsplash.com/1200x800/?bmw,3series,interior",
+      "https://source.unsplash.com/1200x800/?bmw,3series,front",
+      "https://source.unsplash.com/1200x800/?bmw,3series,side",
+      "https://source.unsplash.com/1200x800/?bmw,3series,back",
+    ],
     location: "New Brunswick, NJ",
     description:
       "Luxury meets performance — refined interior, excellent handling, and strong resale value.",
@@ -84,6 +112,12 @@ const CarListings: React.FC = () => {
   const [year, setYear] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Reset image index when a new car is selected
+  useEffect(() => {
+    setCurrentImageIndex(0);
+  }, [selectedCar]);
 
   const filteredCars = mockCars.filter((car) => {
     return (
@@ -131,7 +165,10 @@ const CarListings: React.FC = () => {
           <div
             className="car-card"
             key={car.id}
-            onClick={() => setSelectedCar(car)}
+            onClick={() => {
+              setSelectedCar(car);
+              setCurrentImageIndex(0);
+            }}
           >
             <div className="image-wrapper">
               <img src={car.image} alt={`${car.make} ${car.model}`} />
@@ -154,16 +191,74 @@ const CarListings: React.FC = () => {
 
       {/* Modal */}
       {selectedCar && (
-        <div className="modal-overlay" onClick={() => setSelectedCar(null)}>
+        <div
+          className="modal-overlay"
+          onClick={() => {
+            setSelectedCar(null);
+            setCurrentImageIndex(0);
+          }}
+        >
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <button className="close-btn" onClick={() => setSelectedCar(null)}>
+            <button
+              className="close-btn"
+              onClick={() => {
+                setSelectedCar(null);
+                setCurrentImageIndex(0);
+              }}
+            >
               ×
             </button>
-            <img
-              src={selectedCar.image}
-              alt={selectedCar.model}
-              className="modal-img"
-            />
+            <div className="image-carousel-container">
+              <div
+                className="image-carousel"
+                style={{
+                  transform: `translateX(-${currentImageIndex * 100}%)`,
+                }}
+              >
+                {selectedCar.images.map((img, index) => (
+                  <img
+                    key={index}
+                    src={img}
+                    alt={`${selectedCar.make} ${selectedCar.model} - Image ${index + 1}`}
+                    className="carousel-image"
+                  />
+                ))}
+              </div>
+              {currentImageIndex > 0 && (
+                <button
+                  className="carousel-btn carousel-btn-left"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentImageIndex(currentImageIndex - 1);
+                  }}
+                >
+                  ‹
+                </button>
+              )}
+              {currentImageIndex < selectedCar.images.length - 1 && (
+                <button
+                  className="carousel-btn carousel-btn-right"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentImageIndex(currentImageIndex + 1);
+                  }}
+                >
+                  ›
+                </button>
+              )}
+              <div className="carousel-indicators">
+                {selectedCar.images.map((_, index) => (
+                  <button
+                    key={index}
+                    className={`indicator ${index === currentImageIndex ? "active" : ""}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentImageIndex(index);
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
             <div className="modal-content">
               <h2>
                 {selectedCar.year} {selectedCar.make} {selectedCar.model}
