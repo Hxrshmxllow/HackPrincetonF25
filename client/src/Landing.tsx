@@ -1,11 +1,36 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Car, AlertTriangle, TrendingUp, ShieldCheck, User } from "lucide-react";
+import { Car, AlertTriangle, TrendingUp, ShieldCheck, User, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "./AuthContext";
 import "./App.css";
 
 const Landing: React.FC = () => {
   const navigate = useNavigate();
-  const hasProfile = localStorage.getItem("profile");
+  const { user, signIn, signUp, logout } = useAuth();
+  const [showAuth, setShowAuth] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [authError, setAuthError] = useState("");
+  const hasProfile = user || localStorage.getItem("profile");
+
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError("");
+    try {
+      if (isSignUp) {
+        await signUp(email, password);
+      } else {
+        await signIn(email, password);
+      }
+      setShowAuth(false);
+      setEmail("");
+      setPassword("");
+    } catch (err: any) {
+      setAuthError(err.message || "Authentication failed");
+    }
+  };
 
   return (
     <div className="page">
@@ -19,14 +44,24 @@ const Landing: React.FC = () => {
           <a href="#">Features</a>
           <a href="#">Contact</a>
         </div>
-        {hasProfile ? (
-          <button className="profile-icon" onClick={() => navigate("/profile")}>
-            <User size={24} />
-          </button>
+        {user ? (
+          <>
+            <button className="profile-icon" onClick={() => navigate("/profile")}>
+              <User size={24} />
+            </button>
+            <button className="nav-btn" onClick={logout} style={{ marginLeft: "8px" }}>
+              Logout
+            </button>
+          </>
         ) : (
-          <button className="nav-btn" onClick={() => navigate("/setup")}>
-            Get Started
-          </button>
+          <>
+            <button className="nav-btn" onClick={() => setShowAuth(true)}>
+              Sign In
+            </button>
+            <button className="nav-btn" onClick={() => navigate("/setup")} style={{ marginLeft: "8px" }}>
+              Get Started
+            </button>
+          </>
         )}
       </nav>
 
@@ -102,6 +137,77 @@ const Landing: React.FC = () => {
           Ownership
         </span>
       </footer>
+
+      {showAuth && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "rgba(0,0,0,0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: "white",
+            padding: "2rem",
+            borderRadius: "8px",
+            maxWidth: "400px",
+            width: "90%"
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+              <h2>{isSignUp ? "Sign Up" : "Sign In"}</h2>
+              <button onClick={() => setShowAuth(false)} style={{ background: "none", border: "none", cursor: "pointer" }}>
+                <X size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleAuth}>
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                style={{ width: "100%", padding: "0.5rem", marginBottom: "1rem", borderRadius: "4px", border: "1px solid #ccc" }}
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                style={{ width: "100%", padding: "0.5rem", marginBottom: "1rem", borderRadius: "4px", border: "1px solid #ccc" }}
+              />
+              {authError && <p style={{ color: "red", marginBottom: "1rem" }}>{authError}</p>}
+              <button type="submit" style={{
+                width: "100%",
+                padding: "0.75rem",
+                background: "#2563eb",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                marginBottom: "0.5rem"
+              }}>
+                {isSignUp ? "Sign Up" : "Sign In"}
+              </button>
+              <button type="button" onClick={() => setIsSignUp(!isSignUp)} style={{
+                width: "100%",
+                padding: "0.5rem",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#2563eb"
+              }}>
+                {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

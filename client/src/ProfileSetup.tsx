@@ -3,6 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Car, ArrowRight, ArrowLeft, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { carMakes, carModels } from "./carData";
+import { useAuth } from "./AuthContext";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "./firebase";
 import "./ProfileSetup.css";
 
 const ProfileSetup: React.FC = () => {
@@ -20,6 +23,7 @@ const ProfileSetup: React.FC = () => {
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const availableModels = useMemo(() => {
     return profile.make ? carModels[profile.make] || [] : [];
@@ -66,11 +70,25 @@ const ProfileSetup: React.FC = () => {
     return true;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!validate()) return;
     if (step < 5) setStep(step + 1);
     else {
-      localStorage.setItem("profile", JSON.stringify(profile));
+      if (user) {
+        // When logged in, only save to Firestore (don't save to localStorage)
+        try {
+          await setDoc(doc(db, "profiles", user.uid), {
+            ...profile,
+            updatedAt: new Date().toISOString()
+          });
+        } catch (err) {
+          console.error("Error saving profile:", err);
+          // Don't silently fail - show error to user
+        }
+      } else {
+        // Only use localStorage when NOT logged in
+        localStorage.setItem("profile", JSON.stringify(profile));
+      }
       navigate("/");
     }
   };

@@ -2,6 +2,9 @@ import { useState, useEffect, useMemo } from "react";
 import { Car, Save, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { carMakes, carModels } from "./carData";
+import { useAuth } from "./AuthContext";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "./firebase";
 import "./ProfilePage.css";
 
 const ProfilePage: React.FC = () => {
@@ -19,11 +22,31 @@ const ProfilePage: React.FC = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
-    const saved = localStorage.getItem("profile");
-    if (saved) setProfile(JSON.parse(saved));
-  }, []);
+    const loadProfile = async () => {
+      if (user) {
+        // When logged in, only use Firestore (don't fall back to localStorage)
+        try {
+          const docRef = doc(db, "profiles", user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            setProfile(docSnap.data() as typeof profile);
+          }
+          // If document doesn't exist, leave profile empty (new user)
+        } catch (err) {
+          console.error("Error loading profile:", err);
+          // Don't fall back to localStorage - it might be from another user
+        }
+      } else {
+        // Only use localStorage when NOT logged in
+        const saved = localStorage.getItem("profile");
+        if (saved) setProfile(JSON.parse(saved));
+      }
+    };
+    loadProfile();
+  }, [user]);
 
   const availableModels = useMemo(() => {
     return profile.make ? carModels[profile.make] || [] : [];
@@ -45,11 +68,25 @@ const ProfilePage: React.FC = () => {
     return true;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setError("");
     setSuccess(false);
     if (!validate()) return;
-    localStorage.setItem("profile", JSON.stringify(profile));
+    if (user) {
+      // When logged in, only save to Firestore (don't save to localStorage)
+      try {
+        await setDoc(doc(db, "profiles", user.uid), {
+          ...profile,
+          updatedAt: new Date().toISOString()
+        });
+      } catch (err) {
+        console.error("Error saving profile:", err);
+        throw err; // Don't silently fail
+      }
+    } else {
+      // Only use localStorage when NOT logged in
+      localStorage.setItem("profile", JSON.stringify(profile));
+    }
     setSuccess(true);
     setTimeout(() => navigate("/"), 1000);
   };
