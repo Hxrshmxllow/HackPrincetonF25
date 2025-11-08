@@ -16,7 +16,8 @@ const ProfileSetup: React.FC = () => {
     zipCode: "",
     yearMin: "",
     yearMax: "",
-    comfortLevel: ""
+    comfortLevel: "",
+    primaryUse: ""
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -68,7 +69,7 @@ const ProfileSetup: React.FC = () => {
 
   const handleNext = () => {
     if (!validate()) return;
-    if (step < 5) setStep(step + 1);
+    if (step < 6) setStep(step + 1);
     else {
       localStorage.setItem("profile", JSON.stringify(profile));
       navigate("/");
@@ -231,6 +232,20 @@ const ProfileSetup: React.FC = () => {
             </div>
           </>
         );
+      case 6:
+        return (
+          <>
+            <h2>What will this vehicle be used for?</h2>
+            <p className="step-description">Describe the primary purpose for this vehicle</p>
+            <input
+              type="text"
+              value={profile.primaryUse}
+              onChange={(e) => update("primaryUse", e.target.value)}
+              placeholder="e.g., Daily commuting, family trips, off-road adventures..."
+              autoFocus
+            />
+          </>
+        );
       default:
         return null;
     }
@@ -247,7 +262,7 @@ const ProfileSetup: React.FC = () => {
 
       <div className="setup-container">
         <div className="progress">
-          {[...Array(6)].map((_, i) => (
+          {[...Array(7)].map((_, i) => (
             <div key={i} className={`dot ${i <= step ? "active" : ""}`} />
           ))}
         </div>
@@ -278,7 +293,7 @@ const ProfileSetup: React.FC = () => {
             {step === 0 ? "Home" : "Back"}
           </button>
           <button onClick={handleNext} className="btn-primary">
-            {step === 5 ? "Finish" : "Next"}
+            {step === 6 ? "Finish" : "Next"}
             <ArrowRight size={20} />
           </button>
         </div>

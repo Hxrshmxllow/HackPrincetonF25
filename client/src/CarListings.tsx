@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "./CarListings.css";
+import { Car } from "lucide-react";
+//import { useNavigate } from "react-router-dom";
+import "./App.tsx"
 
 interface Car {
   id: number;
@@ -113,6 +116,8 @@ const CarListings: React.FC = () => {
   const [maxPrice, setMaxPrice] = useState("");
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  // const hasProfile = localStorage.getItem("profile");
+  // const navigate = useNavigate();
 
   // Reset image index when a new car is selected
   useEffect(() => {
@@ -129,6 +134,28 @@ const CarListings: React.FC = () => {
   });
 
   return (
+    <div className="page">
+    {/* <nav className="navbar-listings">
+      <div className="logo">
+        <Car size={28} />
+        <span>CarInsight</span>
+      </div>
+      <div className="nav-links">
+        <a href="#">Home</a>
+        <a href="#">Features</a>
+        <a href="#">Contact</a>
+      </div>
+      {hasProfile ? (
+        <button className="profile-icon" onClick={() => navigate("/profile")}>
+          <User size={24} />
+        </button>
+      ) : (
+        <button className="nav-btn" onClick={() => navigate("/setup")}>
+          Get Started
+        </button>
+      )}
+    </nav> */}
+
     <div className="listings-page">
       <div className="filter-bar">
         <h2>🔍 Find Your Perfect Ride</h2>
@@ -260,28 +287,33 @@ const CarListings: React.FC = () => {
               </div>
             </div>
             <div className="modal-content">
-              <h2>
-                {selectedCar.year} {selectedCar.make} {selectedCar.model}
-              </h2>
-              <p className="modal-price">
-                ${selectedCar.price.toLocaleString()}
-              </p>
-              <p className="modal-detail">
-                📍 {selectedCar.location} • {selectedCar.mileage.toLocaleString()}{" "}
-                miles
-              </p>
-              <p className="description">{selectedCar.description}</p>
-              <div className="insight-box">
-                <p>💡 {selectedCar.maintenanceNote}</p>
-                <p>
-                  🛡 Estimated Insurance: $
-                  {selectedCar.insuranceEstimate.toLocaleString()}/yr
-                </p>
+              <div className="modal-content-wrapper">
+                <div className="vehicle-info">
+                  <h2>
+                    {selectedCar.year} {selectedCar.make} {selectedCar.model}
+                  </h2>
+                  <p className="modal-price">
+                    ${selectedCar.price.toLocaleString()}
+                  </p>
+                  <p className="modal-detail">
+                    📍 {selectedCar.location} • {selectedCar.mileage.toLocaleString()}{" "}
+                    miles
+                  </p>
+                  <p className="description">{selectedCar.description}</p>
+                </div>
+                <div className="insight-box">
+                  <p>💡 {selectedCar.maintenanceNote}</p>
+                  <p>
+                    🛡 Estimated Insurance: $
+                    {selectedCar.insuranceEstimate.toLocaleString()}/yr
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };

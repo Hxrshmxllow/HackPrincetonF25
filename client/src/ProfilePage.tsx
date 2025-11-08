@@ -14,7 +14,8 @@ const ProfilePage: React.FC = () => {
     zipCode: "",
     yearMin: "",
     yearMax: "",
-    comfortLevel: ""
+    comfortLevel: "",
+    primaryUse: ""
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -42,6 +43,7 @@ const ProfilePage: React.FC = () => {
       setError("Min year must be less than max year");
       return false;
     }
+
     return true;
   };
 
@@ -190,6 +192,17 @@ const ProfilePage: React.FC = () => {
               <option value="electric">Electric/Hybrid - Eco-friendly, modern tech</option>
             </select>
           </div>
+
+          <div className="field full-span">
+            <label>Primary Use</label>
+            <input
+              type="text"
+              value={profile.primaryUse}
+              onChange={(e) => update("primaryUse", e.target.value)}
+              placeholder="What will this vehicle be used for?"
+             /> 
+          </div>
+
         </div>
 
         {error && (
