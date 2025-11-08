@@ -1,12 +1,23 @@
-import { useState, useEffect } from "react";
-import { Car, Save } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Car, Save, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { carMakes, carModels } from "./carData";
 import "./ProfilePage.css";
 
-const labels = ["Name", "Budget Range", "Car Type", "Location", "Primary Use"];
-
 const ProfilePage: React.FC = () => {
-  const [profile, setProfile] = useState<string[]>(Array(5).fill(""));
+  const [profile, setProfile] = useState({
+    name: "",
+    budgetMin: "",
+    budgetMax: "",
+    make: "",
+    model: "",
+    zipCode: "",
+    yearMin: "",
+    yearMax: "",
+    comfortLevel: ""
+  });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,15 +25,43 @@ const ProfilePage: React.FC = () => {
     if (saved) setProfile(JSON.parse(saved));
   }, []);
 
-  const handleSave = () => {
-    localStorage.setItem("profile", JSON.stringify(profile));
-    navigate("/");
+  const availableModels = useMemo(() => {
+    return profile.make ? carModels[profile.make] || [] : [];
+  }, [profile.make]);
+
+  const validate = () => {
+    if (!profile.name.trim()) {
+      setError("Name is required");
+      return false;
+    }
+    if (profile.budgetMin && profile.budgetMax && Number(profile.budgetMin) > Number(profile.budgetMax)) {
+      setError("Min budget must be less than max budget");
+      return false;
+    }
+    if (profile.yearMin && profile.yearMax && Number(profile.yearMin) > Number(profile.yearMax)) {
+      setError("Min year must be less than max year");
+      return false;
+    }
+    return true;
   };
 
-  const updateField = (index: number, value: string) => {
-    const updated = [...profile];
-    updated[index] = value;
-    setProfile(updated);
+  const handleSave = () => {
+    setError("");
+    setSuccess(false);
+    if (!validate()) return;
+    localStorage.setItem("profile", JSON.stringify(profile));
+    setSuccess(true);
+    setTimeout(() => navigate("/"), 1000);
+  };
+
+  const update = (field: string, value: string) => {
+    setError("");
+    setSuccess(false);
+    if (field === "make") {
+      setProfile({ ...profile, make: value, model: "" });
+    } else {
+      setProfile({ ...profile, [field]: value });
+    }
   };
 
   return (
@@ -38,18 +77,133 @@ const ProfilePage: React.FC = () => {
         <h1>Your Profile</h1>
 
         <div className="fields">
-          {labels.map((label, i) => (
-            <div key={i} className="field">
-              <label>{label}</label>
+          <div className="field full-span">
+            <label>Full Name *</label>
+            <input
+              type="text"
+              value={profile.name}
+              onChange={(e) => update("name", e.target.value)}
+              placeholder="Enter your name..."
+            />
+          </div>
+
+          <div className="field">
+            <label>Budget Min ($)</label>
+            <input
+              type="number"
+              value={profile.budgetMin}
+              onChange={(e) => update("budgetMin", e.target.value)}
+              placeholder="e.g., 10000"
+              min="0"
+            />
+          </div>
+
+          <div className="field">
+            <label>Budget Max ($)</label>
+            <input
+              type="number"
+              value={profile.budgetMax}
+              onChange={(e) => update("budgetMax", e.target.value)}
+              placeholder="e.g., 50000"
+              min="0"
+            />
+          </div>
+
+          <div className="field">
+            <label>Car Make</label>
+            <input
+              list="makes-list-profile"
+              value={profile.make}
+              onChange={(e) => update("make", e.target.value)}
+              placeholder="Type to search makes..."
+              autoComplete="off"
+            />
+            <datalist id="makes-list-profile">
+              {carMakes.map(m => <option key={m} value={m} />)}
+            </datalist>
+          </div>
+
+          <div className="field">
+            <label>Car Model</label>
+            {profile.make && availableModels.length > 0 ? (
+              <select value={profile.model} onChange={(e) => update("model", e.target.value)}>
+                <option value="">Any Model (Optional)</option>
+                {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
+              </select>
+            ) : (
               <input
                 type="text"
-                value={profile[i]}
-                onChange={(e) => updateField(i, e.target.value)}
-                placeholder={`Enter your ${label.toLowerCase()}...`}
+                value=""
+                disabled
+                placeholder="Select make first..."
+                className="disabled-field"
               />
-            </div>
-          ))}
+            )}
+          </div>
+
+          <div className="field">
+            <label>ZIP Code</label>
+            <input
+              type="text"
+              value={profile.zipCode}
+              onChange={(e) => update("zipCode", e.target.value)}
+              placeholder="Enter ZIP code..."
+              maxLength={5}
+            />
+          </div>
+
+          <div className="field">
+            <label>Model Year Min</label>
+            <input
+              type="number"
+              value={profile.yearMin}
+              onChange={(e) => update("yearMin", e.target.value)}
+              placeholder="e.g., 2015"
+              min="1990"
+              max="2025"
+            />
+          </div>
+
+          <div className="field">
+            <label>Model Year Max</label>
+            <input
+              type="number"
+              value={profile.yearMax}
+              onChange={(e) => update("yearMax", e.target.value)}
+              placeholder="e.g., 2024"
+              min="1990"
+              max="2025"
+            />
+          </div>
+
+          <div className="field full-span">
+            <label>Comfort Level</label>
+            <select value={profile.comfortLevel} onChange={(e) => update("comfortLevel", e.target.value)}>
+              <option value="">Select Comfort Level</option>
+              <option value="sports">Sports Car - Performance-focused, agile handling</option>
+              <option value="luxury">Luxury - Premium comfort, high-end features</option>
+              <option value="suv">SUV/Crossover - Spacious, higher seating, versatile</option>
+              <option value="sedan">Sedan - Balanced comfort and efficiency</option>
+              <option value="truck">Truck - Rugged, utility-focused, towing</option>
+              <option value="compact">Compact/Economy - Fuel-efficient, easy parking</option>
+              <option value="minivan">Minivan - Family-friendly, maximum space</option>
+              <option value="electric">Electric/Hybrid - Eco-friendly, modern tech</option>
+            </select>
+          </div>
         </div>
+
+        {error && (
+          <div className="error-message">
+            <AlertCircle size={16} />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {success && (
+          <div className="success-message">
+            <span>✓ Profile saved successfully!</span>
+          </div>
+        )}
 
         <button onClick={handleSave} className="save-btn">
           <Save size={20} />

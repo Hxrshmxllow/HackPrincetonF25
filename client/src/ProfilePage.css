@@ -46,7 +46,8 @@
   letter-spacing: 0.05em;
 }
 
-.field input {
+.field input,
+.field select {
   padding: 0.875rem 1.25rem;
   font-size: 1rem;
   border: 2px solid #e5e7eb;
@@ -56,10 +57,67 @@
   outline: none;
 }
 
-.field input:focus {
+.field input:focus,
+.field select:focus {
   border-color: #2563eb;
   background: white;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.field .search-field {
+  background: white;
+  border-color: #d1d5db;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.field select {
+  margin-top: 0.5rem;
+}
+
+.full-span {
+  grid-column: 1 / -1;
+}
+
+.disabled-field {
+  background: #e5e7eb !important;
+  cursor: not-allowed;
+  color: #9ca3af;
+}
+
+.error-message,
+.success-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  animation: slideIn 0.3s ease;
+}
+
+.error-message {
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.success-message {
+  color: #16a34a;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .save-btn {
@@ -85,4 +143,8 @@
   background: #1d4ed8;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+}
+
+.save-btn:active {
+  transform: translateY(0);
 }
