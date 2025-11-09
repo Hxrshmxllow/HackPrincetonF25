@@ -1,0 +1,112 @@
+/* ===== GLOBAL ===== */
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, sans-serif;
+  background: linear-gradient(180deg, #f9fafb, #ffffff);
+  color: #1f2937;
+  overflow-x: hidden;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ===== HERO SECTION ===== */
+.hero {
+  text-align: center;
+  padding-top: 12rem;
+  padding-bottom: 8rem;
+  max-width: 700px;
+}
+
+.hero h1 {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 1.25rem;
+  line-height: 1.1;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  color: #4b5563;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.cta {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 1rem 2.5rem;
+  border-radius: 9999px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.cta:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+/* ===== FEATURES ===== */
+.features {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding: 4rem 2rem;
+  max-width: 1100px;
+}
+
+.card {
+  background: white;
+  border-radius: 1.25rem;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  flex: 1 1 300px;
+  max-width: 340px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1rem;
+}
+
+.card p {
+  color: #4b5563;
+  margin-top: 0.5rem;
+  line-height: 1.6;
+}
+
+/* ===== TRUST SECTION ===== */
+.trust {
+  width: 100%;
+  background: #2563eb;
+  color: white;
+  text-align: center;
+  padding: 5rem 1rem;
+}
+
+.trust h2 {
+  font-size: 2rem;
+  margin-top: 1rem;
+}
+
+.trust p {
+  color: #dbeafe;
+  max-width: 600px;
+  margin: 1rem auto 0;
+}
