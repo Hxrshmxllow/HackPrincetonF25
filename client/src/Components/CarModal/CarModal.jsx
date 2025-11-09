@@ -8,6 +8,7 @@ import RatingsSection from "../RatingsSection/RatingsSection";
 import InsuranceBreakdown from "../InsuranceBreakdown/InsuranceBreakdown";
 import ModernCarousel from "../ModernCarousel/ModernCarousel";
 import AICarAnalysis from "../AICarAnalysis/AICarAnalysis";
+import CheckListButton from "../CheckListButton/CheckListButton";
 
 function CarModal({ car, onClose }) {
   const [chatOpen, setChatOpen] = useState(false);
@@ -48,6 +49,7 @@ function CarModal({ car, onClose }) {
             <RatingsSection car={car} />
             <InsuranceBreakdown car={car} />
             <AICarAnalysis car={car} />
+            <CheckListButton car={car} />
           </div>
         </div>
 

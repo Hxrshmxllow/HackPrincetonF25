@@ -1,8 +1,9 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, send_file
 import json
 import requests
 import os
-from ..utils.openai import get_car_analysis
+from ..utils.openai import get_car_analysis, get_car_checklist
+from ..utils.pdf_generator import generate_checklist_pdf
 
 
 ai_bp = Blueprint("ai", __name__)
@@ -49,4 +50,26 @@ def get_ai_analysis():
 
     except Exception as e:
         print(f"❌ AI analysis error: {e}")
+        return jsonify({"error": str(e)}), 500
+    
+@ai_bp.route("/checklist", methods=["POST"])
+def generate_checklist():
+    try:
+        vehicle_data = request.get_json()
+        if not vehicle_data:
+            return jsonify({"error": "Missing or invalid JSON body"}), 400
+
+        # 1️⃣ Get AI checklist + price reasoning
+        checklist = get_car_checklist(vehicle_data)
+        if isinstance(checklist, tuple):  # error jsonify
+            return checklist
+
+        # 2️⃣ Generate PDF file
+        pdf_path = generate_checklist_pdf(vehicle_data, checklist)
+
+        # 3️⃣ Send to frontend
+        return send_file(pdf_path, as_attachment=True)
+
+    except Exception as e:
+        print("❌ Checklist generation failed:", e)
         return jsonify({"error": str(e)}), 500

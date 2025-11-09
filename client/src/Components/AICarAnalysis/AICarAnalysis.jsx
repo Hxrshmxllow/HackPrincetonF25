@@ -7,6 +7,21 @@ function AiCarAnalysis({ car }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const handleDownloadChecklist = async () => {
+    const res = await fetch("http://127.0.0.1:8000/ai/checklist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(car),
+    });
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${car.make}_${car.model}_Checklist.pdf`;
+    link.click();
+    };
+
   useEffect(() => {
     if (!car) return;
 
@@ -23,7 +38,24 @@ function AiCarAnalysis({ car }) {
         if (!response.ok) throw new Error("Failed to get AI analysis");
 
         const data = await response.json();
-        setAnalysis(data.aiAnalysis);
+        let parsed = data.aiAnalysis || data;
+
+        if (parsed.rawText) {
+        try {
+            // Remove ```json ... ``` fences if present
+            const cleanText = parsed.rawText
+            .replace(/```json|```/g, "")
+            .trim();
+
+            const inner = JSON.parse(cleanText);
+            parsed = inner;
+        } catch (e) {
+            console.warn("⚠️ Could not parse AI rawText JSON:", parsed.rawText);
+        }
+        }
+
+        console.log("✅ Final parsed AI analysis:", parsed);
+        setAnalysis(parsed);
       } catch (err) {
         console.error("AI fetch error:", err);
         setError("Unable to analyze this car right now. Please try again later.");

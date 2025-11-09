@@ -260,3 +260,50 @@ def get_car_analysis(vehicle_data):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+def get_car_checklist(vehicle_data):
+    key = os.getenv("OPENAI_API_KEY")
+    if not key:
+        return jsonify({"error": "Missing OpenAI API key"}), 500
+
+    client = OpenAI(api_key=key)
+
+    prompt = f"""
+    You are an expert car market analyst and buyer advocate.
+    Analyze the following car listing JSON and produce a negotiation-ready buyer checklist.
+
+    Car data:
+    {vehicle_data}
+
+    Return a JSON object with these keys:
+    {{
+      "fairMarketValue": "Estimated fair value in USD considering year, trim, mileage, and accident history.",
+      "valuationReasoning": "Explain in plain English how this fair price was determined and what factors affect it.",
+      "negotiationTips": ["3-6 bullet points of specific strategies or arguments the buyer can use to negotiate."],
+      "inspectionChecklist": ["A detailed checklist (8-12 items) of what to inspect physically — scratches, tire wear, smoking smell, warranty scams, dashboard lights, leaks, etc."],
+      "dealerWarningSigns": ["List 3-5 dealership or seller red flags to avoid — e.g., pushy warranty offers, title branding, odometer tampering, fake CPO claims."],
+      "warrantyAdvice": "Advice on whether extended warranties or dealer add-ons are worth it for this model.",
+      "finalSummary": "1 paragraph summarizing if this car is a good purchase and what a smart offer range would be."
+    }}
+
+    Respond strictly in clean JSON — no commentary, markdown, or prose.
+    """
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            temperature=0.4,
+            messages=[
+                {"role": "system", "content": "You are a car market expert and PDF report generator."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+        raw = response.choices[0].message.content.strip()
+        try:
+            result = json.loads(raw)
+        except json.JSONDecodeError:
+            result = {"rawText": raw}
+        return result
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
