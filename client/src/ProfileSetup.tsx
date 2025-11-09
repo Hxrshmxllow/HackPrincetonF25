@@ -256,6 +256,13 @@ const ProfileSetup: React.FC = () => {
 
   return (
     <div className="setup-page">
+      {/* Animated Gradient Background */}
+      <div className="gradient-bg">
+        <div className="gradient-blob blob-1"></div>
+        <div className="gradient-blob blob-2"></div>
+        <div className="gradient-blob blob-3"></div>
+      </div>
+
       <nav className="navbar">
         <div className="logo">
           <Car size={28} />

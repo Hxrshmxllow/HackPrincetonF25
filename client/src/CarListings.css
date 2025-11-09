@@ -2,13 +2,14 @@
    GLOBAL LAYOUT
 ============================== */
 .listings-page {
+  position: relative;
   min-height: 100vh;
-  background: linear-gradient(180deg, #f3f4f6, #ffffff);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 6rem 1.5rem;
   font-family: "Inter", system-ui, sans-serif;
+  overflow: hidden;
 }
 
 /* ==============================
@@ -17,7 +18,7 @@
 .filter-bar {
   position: sticky;
   top: 1rem;
-  z-index: 5;
+  z-index: 10;
   backdrop-filter: blur(14px);
   background: rgba(255, 255, 255, 0.75);
   border-radius: 20px;
@@ -63,6 +64,8 @@
    CAR GRID
 ============================== */
 .car-grid {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 2.5rem;
@@ -369,7 +372,8 @@ body.modal-open {
 }
 
 .ratings-section,
-.history-section {
+.history-section,
+.depreciation-section {
   background: #fff;
   padding: 1rem;
   border-radius: 0.75rem;
@@ -378,10 +382,19 @@ body.modal-open {
 }
 
 .ratings-section h3,
-.history-section h3 {
+.history-section h3,
+.depreciation-section h3 {
   font-size: 1.1rem;
   margin-bottom: 0.75rem;
   font-weight: 600;
+}
+
+.depreciation-note {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+  font-style: italic;
 }
 
 .ratings-section ul,

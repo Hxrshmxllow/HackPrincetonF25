@@ -15,10 +15,20 @@ import {
   Star,
   Info,
   History,
-  MessageCircle,
+  TrendingDown,
+   MessageCircle,
   Send,
   ChevronRight as ChevronRightIcon,
 } from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import { useAuth } from "./AuthContext";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "./firebase";
@@ -45,6 +55,7 @@ interface Car {
   drivetrain?: string;
   transmission?: string;
   fuel?: string;
+  baseMsrp?: number;
 }
 
 const fetchListings = async (
@@ -118,6 +129,7 @@ const fetchListings = async (
           drivetrain: vehicle.drivetrain,
           transmission: vehicle.transmission,
           fuel: vehicle.fuel,
+          baseMsrp: vehicle.baseMsrp,
         };
       }
     );
@@ -128,6 +140,42 @@ const fetchListings = async (
     }
     return [];
   }
+};
+
+// Calculate depreciation curve using dual-exponential model
+const calculateDepreciation = (currentPrice: number, currentAge: number, baseMsrp?: number) => {
+  // If we have MSRP, use it; otherwise estimate original price by reverse-calculating
+  const alpha = 0.7;
+  const beta = 0.5;
+  const gamma = 0.08;
+
+  let V0: number;
+  if (baseMsrp && baseMsrp > currentPrice) {
+    V0 = baseMsrp;
+  } else {
+    // Reverse-calculate original price from current value
+    // currentPrice = V₀(αe^(-βt) + (1-α)e^(-γt)) + S
+    // Estimate V0 by working backwards
+    const depreciationFactor = alpha * Math.exp(-beta * currentAge) + (1 - alpha) * Math.exp(-gamma * currentAge);
+    V0 = (currentPrice - currentPrice * 0.15) / depreciationFactor;
+  }
+
+  const S = V0 * 0.15; // Salvage value: 15% of original price
+
+  const data = [];
+  const maxAge = Math.max(15, currentAge + 10);
+
+  for (let t = 0; t <= maxAge; t++) {
+    // V(t) = V₀(αe^(-βt) + (1-α)e^(-γt)) + S
+    const value = V0 * (alpha * Math.exp(-beta * t) + (1 - alpha) * Math.exp(-gamma * t)) + S;
+    data.push({
+      year: t,
+      value: Math.round(value),
+      isCurrent: t === currentAge,
+    });
+  }
+
+  return data;
 };
 
 const CarListings: React.FC = () => {
@@ -289,6 +337,13 @@ const CarListings: React.FC = () => {
 
   return (
     <div className="listings-page">
+      {/* Animated Gradient Background */}
+      <div className="gradient-bg">
+        <div className="gradient-blob blob-1"></div>
+        <div className="gradient-blob blob-2"></div>
+        <div className="gradient-blob blob-3"></div>
+      </div>
+
       {/* Filter Bar */}
       <div className="filter-bar">
         <h2>
@@ -495,7 +550,74 @@ const CarListings: React.FC = () => {
                   </div>
                 )}
                 </div>
-
+               
+               
+                {/* Depreciation Graph */}
+                <div className="depreciation-section">
+                  <h3>
+                    <TrendingDown size={16} /> Value Over Time
+                  </h3>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <LineChart
+                      data={calculateDepreciation(
+                        selectedCar.price,
+                        new Date().getFullYear() - selectedCar.year,
+                        selectedCar.baseMsrp
+                      )}
+                      margin={{ top: 5, right: 10, left: 10, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis
+                        dataKey="year"
+                        label={{ value: "Vehicle age (years)", position: "insideBottom", offset: -5 }}
+                        tick={{ fontSize: 12 }}
+                      />
+                      <YAxis
+                        tick={{ fontSize: 12 }}
+                        tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                      />
+                      <Tooltip
+                        formatter={(value: number) => [`$${value.toLocaleString()}`, "Est. Value"]}
+                        labelFormatter={(label) => `${label} years old`}
+                        contentStyle={{
+                          backgroundColor: "rgba(255, 255, 255, 0.95)",
+                          border: "1px solid #e5e7eb",
+                          borderRadius: "8px",
+                          fontSize: "12px",
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="value"
+                        stroke="#2563eb"
+                        strokeWidth={2}
+                        dot={(props: any) => {
+                          const { cx, cy, payload } = props;
+                          if (payload.isCurrent) {
+                            return (
+                              <circle
+                                cx={cx}
+                                cy={cy}
+                                r={5}
+                                fill="#ef4444"
+                                stroke="#fff"
+                                strokeWidth={2}
+                              />
+                            );
+                          }
+                          return null;
+                        }}
+                        activeDot={{ r: 6 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                  <p className="depreciation-note">
+                    Red dot shows current age ({new Date().getFullYear() - selectedCar.year} yrs) at ${selectedCar.price.toLocaleString()}
+                  </p>
+                </div>
+              </div>     
+                    
+                
               {/* Ratings & Insights */}
               <div className="car-ratings">
                 {selectedCar.ratings && (

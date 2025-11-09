@@ -2,15 +2,101 @@
 body {
   margin: 0;
   font-family: "Inter", system-ui, sans-serif;
-  background: linear-gradient(180deg, #f9fafb, #ffffff);
+  background: #f8fafc;
   color: #1f2937;
   overflow-x: hidden;
 }
 
 .page {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* Animated Gradient Background */
+.gradient-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.gradient-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.6;
+  will-change: transform;
+}
+
+.blob-1 {
+  width: 500px;
+  height: 500px;
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  top: -250px;
+  left: -250px;
+  animation: float-1 15s ease-in-out infinite;
+}
+
+.blob-2 {
+  width: 600px;
+  height: 600px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+  top: 50%;
+  right: -300px;
+  animation: float-2 18s ease-in-out infinite;
+}
+
+.blob-3 {
+  width: 550px;
+  height: 550px;
+  background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%);
+  bottom: -275px;
+  left: 50%;
+  animation: float-3 16s ease-in-out infinite;
+}
+
+@keyframes float-1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(200px, 100px) scale(1.1);
+  }
+  66% {
+    transform: translate(-50px, 150px) scale(0.9);
+  }
+}
+
+@keyframes float-2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-150px, -100px) scale(1.15);
+  }
+  66% {
+    transform: translate(100px, 50px) scale(0.95);
+  }
+}
+
+@keyframes float-3 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-200px, -80px) scale(0.9);
+  }
+  66% {
+    transform: translate(150px, -120px) scale(1.1);
+  }
 }
 
 /* Floating Navbar */
@@ -89,6 +175,8 @@ body {
 
 /* Hero */
 .hero {
+  position: relative;
+  z-index: 1;
   text-align: center;
   padding-top: 12rem;
   padding-bottom: 8rem;
