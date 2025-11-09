@@ -1,61 +1,61 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./CarModal.css";
-import { X, ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
+import { X, MessageCircle } from "lucide-react";
 import ChatSidebar from "../ChatSideBar/ChatSideBar";
 import CarDetails from "../CarDetails/CarDetails";
 import DepreciationChart from "../DepreciationChart/DepreciationChart";
 import RatingsSection from "../RatingsSection/RatingsSection";
 import InsuranceBreakdown from "../InsuranceBreakdown/InsuranceBreakdown";
+import ModernCarousel from "../ModernCarousel/ModernCarousel";
+import AICarAnalysis from "../AICarAnalysis/AICarAnalysis";
 
 function CarModal({ car, onClose }) {
-  const [currentImage, setCurrentImage] = useState(0);
   const [chatOpen, setChatOpen] = useState(false);
+  const modalRef = useRef(null);
+
+  // ✅ Scroll modal to top on open
+  useEffect(() => {
+    if (modalRef.current) {
+      modalRef.current.scrollTop = 0;
+    }
+  }, [car]); // runs whenever a new car is selected
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className={`modal ${chatOpen ? "chat-open" : ""}`} onClick={(e) => e.stopPropagation()}>
+      <div
+        ref={modalRef}  // attach ref here
+        className={`modal ${chatOpen ? "chat-open" : ""}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <button className="close-btn" onClick={onClose}>
           <X />
         </button>
-        <button className="chat-toggle-btn" onClick={() => setChatOpen(!chatOpen)}>
+        <button
+          className="chat-toggle-btn"
+          onClick={() => setChatOpen(!chatOpen)}
+        >
           <MessageCircle />
         </button>
 
-        <div className="modal-main">
-          {/* Carousel */}
-          <div className="carousel">
-            <button
-              className="carousel-btn left"
-              onClick={() =>
-                setCurrentImage(
-                  currentImage === 0 ? car.images.length - 1 : currentImage - 1
-                )
-              }
-            >
-              <ChevronLeft />
-            </button>
-            <img src={car.images[currentImage]} alt={`${car.make}-${car.model}`} />
-            <button
-              className="carousel-btn right"
-              onClick={() =>
-                setCurrentImage((currentImage + 1) % car.images.length)
-              }
-            >
-              <ChevronRight />
-            </button>
-          </div>
+        <div className="modal-carousel-wrapper">
+          <ModernCarousel images={car.images || [car.image]} />
+        </div>
 
-          {/* Content */}
+        <div className="modal-main">
           <div className="modal-columns">
             <CarDetails car={car} />
             <DepreciationChart car={car} />
             <RatingsSection car={car} />
             <InsuranceBreakdown car={car} />
+            <AICarAnalysis car={car} />
           </div>
         </div>
 
-        {/* Chat Sidebar */}
-        <ChatSidebar open={chatOpen} car={car} onClose={() => setChatOpen(false)} />
+        <ChatSidebar
+          open={chatOpen}
+          car={car}
+          onClose={() => setChatOpen(false)}
+        />
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ from flask import Flask, request
 from flask_cors import CORS
 from .routes.recommendation import recommendations_bp
 from .routes.listings import listings_bp
+from .routes.ai_analysis import ai_bp
 import os
 from dotenv import load_dotenv
 
@@ -28,6 +29,7 @@ def create_app():
 
     app.register_blueprint(recommendations_bp, url_prefix="/recommendations")
     app.register_blueprint(listings_bp, url_prefix="/listings")
+    app.register_blueprint(ai_bp, url_prefix="/ai")
     @app.route("/")
     def root():
         return {"message": "HackPrincetonF25 backend running on AWS-ready Flask app"}

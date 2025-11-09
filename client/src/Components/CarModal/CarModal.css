@@ -1,29 +1,73 @@
-/* ====== MODAL BASE ====== */
+/* ====== OVERLAY ====== */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.65);
+  background: rgba(15, 23, 42, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 50;
+  z-index: 1000;
   animation: fadeIn 0.3s ease;
+  backdrop-filter: blur(3px);
 }
 
+/* ====== MODAL CONTAINER ====== */
 .modal {
-  background: white;
-  border-radius: 20px;
-  max-width: 900px;
-  width: 95%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    overflow-y: auto;     /* ✅ allow entire modal (including carousel) to scroll */
+  overflow-x: hidden;
   position: relative;
+  background: #ffffff;
+  border-radius: 20px;
+  width: 95%;
+  max-width: 1150px;
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   animation: slideUp 0.35s ease;
+  z-index: 1001;
 }
 
+/* ====== CAROUSEL WRAPPER ====== */
+.modal-carousel-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px 20px 0 0;
+  flex-shrink: 0;
+  z-index: 1; /* Below buttons, above modal background */
+}
+
+/* ====== CONTENT AREA ====== */
+.modal-main {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow: visible;
+  flex: 1;
+  background: #fff;
+}
+
+.modal-columns {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding: 1.75rem 2rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* ====== SCROLLBAR ====== */
+.modal-main::-webkit-scrollbar {
+  width: 8px;
+}
+.modal-main::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.4);
+  border-radius: 8px;
+}
+.modal-main::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.6);
+}
+
+/* ====== CLOSE BUTTON ====== */
 .close-btn {
   position: absolute;
   top: 0.75rem;
@@ -34,65 +78,57 @@
   color: #9ca3af;
   cursor: pointer;
   transition: color 0.2s ease;
+  z-index: 5;
 }
-
 .close-btn:hover {
   color: #111827;
 }
 
-/* ====== CAROUSEL ====== */
-.carousel {
-  position: relative;
-  width: 100%;
-  height: 320px;
-  overflow: hidden;
-  border-radius: 20px 20px 0 0;
-}
-
-.carousel img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.carousel-btn {
+/* ====== CHAT TOGGLE BUTTON ====== */
+.chat-toggle-btn {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.85);
+  top: 0.75rem;
+  right: 3rem;
   border: none;
   border-radius: 50%;
-  padding: 0.5rem;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.carousel-btn.left {
-  left: 10px;
-}
-.carousel-btn.right {
-  right: 10px;
-}
-
-.carousel-btn:hover {
-  background: rgba(255, 255, 255, 1);
-}
-
-/* ====== CONTENT ====== */
-.modal-columns {
-  padding: 1.75rem;
+  width: 50px;
+  height: 50px;
   display: flex;
-  flex-direction: column;
-  gap: 1.75rem;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(3px);
+  cursor: pointer;
+  z-index: 6;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+.chat-toggle-btn:hover {
+  background: rgba(15, 23, 42, 0.8);
+  transform: scale(1.05);
+}
+.chat-toggle-btn svg {
+  color: #fff;
+  width: 26px;
+  height: 26px;
 }
 
-/* Animations */
+/* ====== ANIMATIONS ====== */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
-
 @keyframes slideUp {
   from { transform: translateY(40px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 768px) {
+  .modal {
+    max-width: 95%;
+    border-radius: 16px;
+  }
+  .modal-columns {
+    padding: 1.25rem;
+  }
 }

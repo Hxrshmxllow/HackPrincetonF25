@@ -196,3 +196,67 @@ def chat_about_car(car_data, message_history):
 
     except Exception as e:
         return {"error": str(e)}
+    
+def get_car_analysis(vehicle_data):
+    key = os.getenv("OPENAI_API_KEY")
+    if not key:
+        return jsonify({"error": "Missing OpenAI API key"}), 500
+
+    client = OpenAI(api_key=key)
+
+    # Validate input
+    if not vehicle_data:
+        return jsonify({"error": "Missing vehicle data"}), 400
+
+    # --- Build the AI prompt ---
+    prompt = f"""
+    You are an expert automotive analyst and consumer report writer specializing in used cars.
+
+    Analyze the following car listing data in detail:
+    {vehicle_data}
+
+    Provide a **comprehensive JSON response** covering both quantitative and qualitative analysis.
+
+    Your response must contain these exact JSON keys:
+
+    {{
+      "summary": "A short 2-3 sentence executive summary of this vehicle’s market position, condition, and suitability for a typical buyer.",
+      "pros": ["3-6 bullet points of notable strengths this car has over competitors in the same segment/price range (include niche or enthusiast insights)."],
+      "cons": ["3-6 bullet points of potential drawbacks, design issues, or ownership challenges that an average buyer may overlook (mention expensive or common failures)."],
+      "competitorComparison": "Brief analysis comparing this car’s value, performance, and reliability to its direct competitors (list specific models like Honda Accord, Toyota Camry, etc).",
+      "commonIssues": ["2-4 specific, costly maintenance problems or recalls known for this generation (include estimated repair costs if possible)."],
+      "idealBuyer": "Describe what kind of driver or owner profile benefits most from this car (e.g., commuter, family driver, enthusiast).",
+      "verdict": "Final verdict in 1-2 sentences — should the buyer consider, negotiate, or avoid this car?",
+      "confidence": "Numeric confidence (0.0 - 1.0) in this analysis based on data completeness and market familiarity."
+    }}
+
+    - Use publicly known automotive data, reviews, reliability reports, and enthusiast community trends up to 2024.
+    - Be specific to the **generation and model year** if identifiable.
+    - Include mechanical insights, long-term ownership patterns, and depreciation factors.
+    - Avoid any conversational filler — respond **only with the JSON object**, properly formatted.
+    """
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",  # can also use gpt-4.1 for deeper reasoning
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are an unbiased car expert that returns structured JSON only."
+                },
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.4
+        )
+
+        raw = response.choices[0].message.content.strip()
+        try:
+            analysis = json.loads(raw)
+        except json.JSONDecodeError:
+            analysis = {"rawText": raw}
+
+        print(analysis)
+        return analysis
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
