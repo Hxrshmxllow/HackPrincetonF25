@@ -80,6 +80,7 @@ const fetchListings = async (
         const vehicle = item.vehicle || {};
         const ratings = item.ratings || {};
         const history = item.history || {};
+
         const parsedImages = Array.isArray(retail.images)
           ? retail.images
           : typeof retail.images === "string"
@@ -147,10 +148,30 @@ const CarListings: React.FC = () => {
   useEffect(() => {
     const loadCars = async () => {
       setLoading(true);
-      const data = await fetchListings("NJ", 80000, "Luxury");
-      setCars(data);
+
+      try {
+        const stored = localStorage.getItem("profile");
+
+        let state = "NJ";
+        let budget = 50000;
+        let primaryUse = "Sedan";
+
+        if (stored) {
+          const profile = JSON.parse(stored);
+          state = profile.location.state ? "NJ" : "CA";
+          budget = Number(profile.budget.max) || 50000;
+          primaryUse = profile.comfort.level || "Sedan";
+        }
+
+        const data = await fetchListings(state, budget, primaryUse);
+        setCars(data);
+      } catch (err) {
+        console.error("Error loading listings:", err);
+      }
+
       setLoading(false);
     };
+
     loadCars();
   }, []);
 
@@ -158,6 +179,7 @@ const CarListings: React.FC = () => {
   useEffect(() => {
     if (!selectedCar) return;
     if (autoSlideRef.current) clearInterval(autoSlideRef.current);
+
     autoSlideRef.current = setInterval(() => {
       setCurrentImage((prev) =>
         selectedCar.images.length
@@ -165,6 +187,7 @@ const CarListings: React.FC = () => {
           : 0
       );
     }, 4000);
+
     return () => {
       if (autoSlideRef.current) clearInterval(autoSlideRef.current);
     };
@@ -237,8 +260,7 @@ const CarListings: React.FC = () => {
       (filters.model === "" ||
         car.model.toLowerCase().includes(filters.model.toLowerCase())) &&
       (filters.year === "" || car.year === Number(filters.year)) &&
-      (filters.maxPrice === "" ||
-        car.price <= Number(filters.maxPrice))
+      (filters.maxPrice === "" || car.price <= Number(filters.maxPrice))
   );
 
   return (
@@ -392,6 +414,7 @@ const CarListings: React.FC = () => {
                   <Gauge size={14} /> {selectedCar.mileage.toLocaleString()} mi
                 </p>
                 <p className="description">{selectedCar.description}</p>
+
                 {selectedCar.listing && (
                   <a
                     href={selectedCar.listing}

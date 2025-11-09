@@ -124,7 +124,7 @@
 }
 
 /* ==============================
-   MODAL OVERLAY
+   MODAL OVERLAY & CONTAINER
 ============================== */
 .modal-overlay {
   position: fixed;
@@ -137,14 +137,10 @@
   animation: fadeIn 0.3s ease;
 }
 
-/* Prevent background scroll */
 body.modal-open {
   overflow: hidden;
 }
 
-/* ==============================
-   MODAL CONTAINER (SCROLLABLE)
-============================== */
 .modal {
   background: white;
   border-radius: 20px;
@@ -230,12 +226,12 @@ body.modal-open {
 }
 
 /* ==============================
-   IMAGE CAROUSEL (NATURAL RATIO)
+   IMAGE CAROUSEL
 ============================== */
 .image-carousel-container {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9; /* ✅ Keeps natural image ratio */
+  aspect-ratio: 16 / 9;
   background: #000;
   overflow: hidden;
   border-radius: 20px 20px 0 0;
@@ -258,7 +254,6 @@ body.modal-open {
   flex-shrink: 0;
 }
 
-/* Carousel controls */
 .carousel-btn {
   position: absolute;
   top: 50%;
@@ -283,13 +278,8 @@ body.modal-open {
   background: white;
 }
 
-.carousel-btn-left {
-  left: 16px;
-}
-
-.carousel-btn-right {
-  right: 16px;
-}
+.carousel-btn-left { left: 16px; }
+.carousel-btn-right { right: 16px; }
 
 .carousel-indicators {
   position: absolute;
@@ -328,11 +318,6 @@ body.modal-open {
   grid-template-columns: 1.1fr 0.9fr;
   gap: 2rem;
   padding: 2rem;
-}
-
-.car-details,
-.car-ratings {
-  overflow: visible;
 }
 
 .modal h2 {
@@ -421,9 +406,6 @@ body.modal-open {
   background: #f3f4f6;
   padding: 1.25rem;
   border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
   color: #1f2937;
   line-height: 1.5;
 }
@@ -673,7 +655,7 @@ body.modal-open {
   }
 
   .image-carousel-container {
-    aspect-ratio: 4 / 3; /* slightly taller for mobile */
+    aspect-ratio: 4 / 3;
   }
 
   .carousel-btn {
