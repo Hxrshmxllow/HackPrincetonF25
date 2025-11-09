@@ -14,10 +14,11 @@ import {
   Star,
   History,
   TrendingDown,
-   MessageCircle,
+  MessageCircle,
   Send,
   ChevronRight as ChevronRightIcon,
 } from "lucide-react";
+import Navbar from "./Navbar";
 
 import {
   LineChart,
@@ -352,6 +353,8 @@ const CarListings: React.FC = () => {
         <div className="gradient-blob blob-2"></div>
         <div className="gradient-blob blob-3"></div>
       </div>
+
+      <Navbar fixed={false} />
 
       {/* Filter Bar */}
       <div className="filter-bar">

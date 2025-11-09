@@ -99,12 +99,8 @@ body {
   }
 }
 
-/* Floating Navbar */
+/* Navbar Base Styles */
 .navbar {
-  position: fixed;
-  top: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
   width: 90%;
   max-width: 1100px;
   background: rgba(255, 255, 255, 0.7);
@@ -116,6 +112,22 @@ body {
   align-items: center;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   z-index: 10;
+  margin: 0 auto;
+}
+
+/* Fixed navbar for landing page */
+.navbar-fixed {
+  position: fixed;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Static navbar for search/listings pages */
+.navbar-static {
+  position: relative;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
 }
 
 .logo {
@@ -124,6 +136,12 @@ body {
   gap: 0.5rem;
   font-weight: 700;
   font-size: 1.1rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.logo:hover {
+  color: #2563eb;
 }
 
 .nav-links {
@@ -153,6 +171,12 @@ body {
 }
 .nav-btn:hover {
   background-color: #1d4ed8;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .profile-icon {

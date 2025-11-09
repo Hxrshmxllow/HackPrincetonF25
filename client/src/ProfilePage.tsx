@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
-import { Car, Save, AlertCircle } from "lucide-react";
+import { Save, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { carMakes, carModels } from "./carData";
 import { useAuth } from "./AuthContext";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "./firebase";
+import Navbar from "./Navbar";
 import "./ProfilePage.css";
 
 const ProfilePage: React.FC = () => {
@@ -110,12 +111,7 @@ const ProfilePage: React.FC = () => {
         <div className="gradient-blob blob-3"></div>
       </div>
 
-      <nav className="navbar">
-        <div className="logo" onClick={() => navigate("/")}>
-          <Car size={28} />
-          <span>CarInsight</span>
-        </div>
-      </nav>
+      <Navbar fixed={false} />
 
       <div className="profile-container">
         <h1>Your Profile</h1>

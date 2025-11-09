@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Car, MessageCircle, TrendingUp, ShieldCheck, User, X } from "lucide-react";
+import { Car, MessageCircle, TrendingUp, ShieldCheck, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
+import Navbar from "./Navbar";
 import "./App.css";
 
 const Landing: React.FC = () => {
   const navigate = useNavigate();
-  const { user, signIn, signUp, logout } = useAuth();
+  const { user, signIn, signUp } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
@@ -41,36 +42,7 @@ const Landing: React.FC = () => {
         <div className="gradient-blob blob-3"></div>
       </div>
 
-      <nav className="navbar">
-        <div className="logo">
-          <Car size={28} />
-          <span>CarInsight</span>
-        </div>
-        <div className="nav-links">
-          <a href="#">Home</a>
-          <a href="#">Features</a>
-          <a href="#">Contact</a>
-        </div>
-        {user ? (
-          <>
-            <button className="profile-icon" onClick={() => navigate("/profile")}>
-              <User size={24} />
-            </button>
-            <button className="nav-btn" onClick={logout} style={{ marginLeft: "8px" }}>
-              Logout
-            </button>
-          </>
-        ) : (
-          <>
-            <button className="nav-btn" onClick={() => setShowAuth(true)}>
-              Sign In
-            </button>
-            <button className="nav-btn" onClick={() => navigate("/setup")} style={{ marginLeft: "8px" }}>
-              Get Started
-            </button>
-          </>
-        )}
-      </nav>
+      <Navbar fixed={true} onSignInClick={() => setShowAuth(true)} />
 
       <section className="hero">
         <motion.h1
@@ -94,7 +66,13 @@ const Landing: React.FC = () => {
           className="cta"
           whileHover={{ scale: 1.05 }}
           transition={{ type: "spring", stiffness: 200 }}
-          onClick={() => navigate(hasProfile ? "/listings" : "/setup")}
+          onClick={() => {
+            if (user) {
+              navigate(hasProfile ? "/listings" : "/setup");
+            } else {
+              setShowAuth(true);
+            }
+          }}
         >
           Start Your Search
         </motion.button>

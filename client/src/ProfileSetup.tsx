@@ -1,11 +1,12 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Car, ArrowRight, ArrowLeft, AlertCircle } from "lucide-react";
+import { ArrowRight, ArrowLeft, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { carMakes, carModels } from "./carData";
 import { useAuth } from "./AuthContext";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "./firebase";
+import Navbar from "./Navbar";
 import "./ProfileSetup.css";
 
 const ProfileSetup: React.FC = () => {
@@ -263,12 +264,7 @@ const ProfileSetup: React.FC = () => {
         <div className="gradient-blob blob-3"></div>
       </div>
 
-      <nav className="navbar">
-        <div className="logo">
-          <Car size={28} />
-          <span>CarInsight</span>
-        </div>
-      </nav>
+      <Navbar fixed={false} />
 
       <div className="setup-container">
         <div className="progress">
