@@ -346,183 +346,272 @@ const CarListings: React.FC = () => {
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
     let yPosition = margin;
-    const lineHeight = 7;
-    const sectionSpacing = 10;
+    const lineHeight = 6;
+    const sectionSpacing = 8;
 
     // Helper function to add a new page if needed
     const checkPageBreak = (requiredSpace: number) => {
-      if (yPosition + requiredSpace > pageHeight - margin) {
+      if (yPosition + requiredSpace > pageHeight - margin - 10) {
         doc.addPage();
         yPosition = margin;
-        // Reset font to default after adding new page
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(10);
-        doc.setTextColor(0, 0, 0);
       }
     };
 
+    // Helper function to add section header
+    const addSectionHeader = (title: string, color: number[] = [37, 99, 235]) => {
+      checkPageBreak(15);
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(color[0], color[1], color[2]);
+      doc.text(title, margin, yPosition);
+      yPosition += lineHeight + 2;
+
+      // Underline
+      doc.setDrawColor(color[0], color[1], color[2]);
+      doc.setLineWidth(0.5);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += lineHeight;
+    };
+
     // Helper function to add text with word wrap
-    const addText = (text: string, fontSize: number = 10, isBold: boolean = false, color: number[] = [0, 0, 0]) => {
+    const addText = (text: string, fontSize: number = 10, isBold: boolean = false, indent: number = 0) => {
       checkPageBreak(lineHeight * 2);
-      // Always set font settings before adding text
       doc.setFontSize(fontSize);
       doc.setFont("helvetica", isBold ? "bold" : "normal");
-      doc.setTextColor(color[0], color[1], color[2]);
-      
-      const maxWidth = pageWidth - 2 * margin;
+      doc.setTextColor(0, 0, 0);
+
+      const maxWidth = pageWidth - 2 * margin - indent;
       const lines = doc.splitTextToSize(text, maxWidth);
-      
+
       lines.forEach((line: string) => {
         checkPageBreak(lineHeight);
-        // Re-set font settings in case page break occurred
-        doc.setFontSize(fontSize);
-        doc.setFont("helvetica", isBold ? "bold" : "normal");
-        doc.setTextColor(color[0], color[1], color[2]);
-        doc.text(line, margin, yPosition);
+        doc.text(line, margin + indent, yPosition);
         yPosition += lineHeight;
       });
     };
 
-    // Title
-    doc.setFontSize(18);
+    // Helper function to add key-value pair
+    const addKeyValue = (key: string, value: string, indent: number = 0) => {
+      checkPageBreak(lineHeight);
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(0, 0, 0);
+      doc.text(key + ":", margin + indent, yPosition);
+
+      doc.setFont("helvetica", "normal");
+      const keyWidth = doc.getTextWidth(key + ": ");
+      doc.text(value, margin + indent + keyWidth, yPosition);
+      yPosition += lineHeight;
+    };
+
+    // ===== COVER PAGE =====
+    doc.setFillColor(37, 99, 235);
+    doc.rect(0, 0, pageWidth, 60, 'F');
+
+    doc.setFontSize(24);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 255, 255);
+    doc.text("VEHICLE ANALYSIS REPORT", pageWidth / 2, 30, { align: "center" });
+
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${selectedCar.year} ${selectedCar.make} ${selectedCar.model}`, pageWidth / 2, 45, { align: "center" });
+
+    yPosition = 75;
+
+    // Vehicle Overview Box
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.5);
+    doc.rect(margin, yPosition, pageWidth - 2 * margin, 50);
+    yPosition += 8;
+
+    doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(37, 99, 235);
-    doc.text(`Car Buying Guide: ${selectedCar.year} ${selectedCar.make} ${selectedCar.model}`, margin, yPosition);
-    yPosition += lineHeight * 2;
+    doc.text("VEHICLE OVERVIEW", margin + 5, yPosition);
+    yPosition += 8;
 
-    // Car Details Section
-    addText(`Price: $${selectedCar.price.toLocaleString()}`, 12, true);
-    addText(`Mileage: ${selectedCar.mileage.toLocaleString()} miles`, 10);
-    addText(`Location: ${selectedCar.location}`, 10);
+    addKeyValue("Price", `$${selectedCar.price.toLocaleString()}`, 5);
+    addKeyValue("Mileage", `${selectedCar.mileage.toLocaleString()} miles`, 5);
+    addKeyValue("Location", selectedCar.location, 5);
     if (selectedCar.dealer) {
-      addText(`Dealer: ${selectedCar.dealer}`, 10);
+      addKeyValue("Dealer", selectedCar.dealer, 5);
     }
+
     yPosition += sectionSpacing;
 
-    // Negotiation Tips
-    checkPageBreak(lineHeight * 15);
-    addText("NEGOTIATION TIPS", 14, true, [37, 99, 235]);
-    yPosition += 3;
-    
-    const negotiationTips = [
-      "Research the market value using KBB, Edmunds, and similar listings in your area",
-      "Start negotiations 10-15% below the asking price to leave room for compromise",
-      "Get pre-approved financing before negotiating to strengthen your position",
-      "Point out any issues you notice during inspection (scratches, wear, etc.)",
-      "Be willing to walk away if the price doesn't meet your budget",
-      "Negotiate the out-the-door price, not just the sticker price",
-      "Consider timing - end of month/quarter often yields better deals",
-      "Ask about dealer incentives, rebates, or special financing offers",
-      "Don't focus only on monthly payments - negotiate the total price first",
-      "Get competing offers from other dealers to use as leverage"
-    ];
+    // ===== AI RATINGS =====
+    if (selectedCar.ratings) {
+      addSectionHeader("AI-POWERED RATINGS");
 
-    negotiationTips.forEach((tip, index) => {
-      addText(`${index + 1}. ${tip}`, 10, false);
-      yPosition += 2;
-    });
+      const ratings = [
+        { label: "Overall Score", value: selectedCar.ratings.overallRating },
+        { label: "Deal Quality", value: selectedCar.ratings.dealRating },
+        { label: "Fuel Economy", value: selectedCar.ratings.fuelEconomyRating },
+        { label: "Maintenance", value: selectedCar.ratings.maintenanceRating },
+        { label: "Safety", value: selectedCar.ratings.safetyRating },
+        { label: "Owner Satisfaction", value: selectedCar.ratings.ownerSatisfactionRating },
+      ];
+
+      ratings.forEach(rating => {
+        if (!rating.value) return;
+        checkPageBreak(10);
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(0, 0, 0);
+        doc.text(rating.label + ":", margin, yPosition);
+
+        const labelWidth = doc.getTextWidth(rating.label + ": ");
+        const score = typeof rating.value === 'number' ? rating.value : parseFloat(rating.value);
+
+        // Draw rating bar
+        const barWidth = 80;
+        const barHeight = 5;
+        const barX = margin + labelWidth + 5;
+        const barY = yPosition - 4;
+
+        // Background bar
+        doc.setFillColor(230, 230, 230);
+        doc.rect(barX, barY, barWidth, barHeight, 'F');
+
+        // Filled bar based on score
+        const fillWidth = (score / 5) * barWidth;
+        let fillColor = score >= 4 ? [34, 197, 94] : score >= 3 ? [234, 179, 8] : [239, 68, 68];
+        doc.setFillColor(fillColor[0], fillColor[1], fillColor[2]);
+        doc.rect(barX, barY, fillWidth, barHeight, 'F');
+
+        // Score text
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(0, 0, 0);
+        doc.text(score.toFixed(2), barX + barWidth + 5, yPosition);
+
+        yPosition += 8;
+      });
+
+      yPosition += sectionSpacing;
+    }
+
+    // ===== INSURANCE COSTS =====
+    addSectionHeader("ESTIMATED INSURANCE COSTS");
+
+    // Annual/Monthly costs
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(37, 99, 235);
+    addText(`Annual: $${selectedCar.insuranceEstimate.toLocaleString()}`, 11, true);
+    addText(`Monthly: $${selectedCar.insuranceMonthly.toLocaleString()}`, 11, true);
+    yPosition += 3;
+
+    // Breakdown
+    if (selectedCar.insuranceBreakdown) {
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(0, 0, 0);
+      addText("Cost Factors:", 10, true);
+
+      const breakdown = selectedCar.insuranceBreakdown;
+      if (breakdown.locationMultiplier) addKeyValue("Location Factor", `${breakdown.locationMultiplier.toFixed(2)}x`, 5);
+      if (breakdown.makeMultiplier) addKeyValue("Make Factor", `${breakdown.makeMultiplier.toFixed(2)}x`, 5);
+      if (breakdown.bodyStyleMultiplier) addKeyValue("Body Style Factor", `${breakdown.bodyStyleMultiplier.toFixed(2)}x`, 5);
+      if (breakdown.engineMultiplier) addKeyValue("Engine Factor", `${breakdown.engineMultiplier.toFixed(2)}x`, 5);
+      if (breakdown.ageMultiplier) addKeyValue("Age Factor", `${breakdown.ageMultiplier.toFixed(2)}x`, 5);
+      if (breakdown.mileageMultiplier) addKeyValue("Mileage Factor", `${breakdown.mileageMultiplier.toFixed(2)}x`, 5);
+      if (breakdown.accidentMultiplier) addKeyValue("Accident Factor", `${breakdown.accidentMultiplier.toFixed(2)}x`, 5);
+    }
+
     yPosition += sectionSpacing;
 
-    // Inspection Checklist
-    checkPageBreak(lineHeight * 20);
-    addText("INSPECTION CHECKLIST", 14, true, [37, 99, 235]);
-    yPosition += 3;
+    // ===== VEHICLE SPECIFICATIONS =====
+    addSectionHeader("VEHICLE SPECIFICATIONS");
 
-    const inspectionChecklist = [
-      "Exterior: Check for dents, scratches, rust, paint mismatches, and panel gaps",
-      "Tires: Inspect tread depth, wear patterns, and check for dry rot or cracks",
-      "Engine: Look for leaks, check oil color/level, listen for unusual noises",
-      "Transmission: Test all gears, check for smooth shifting, look for leaks",
-      "Brakes: Test brake feel, check for squealing, inspect brake pads if visible",
-      "Suspension: Test drive over bumps, check for bouncing or unusual sounds",
-      "Interior: Check seats, dashboard, electronics, air conditioning, and heating",
-      "Lights: Test all headlights, taillights, turn signals, and interior lights",
-      "Fluids: Check oil, coolant, brake fluid, transmission fluid, and power steering",
-      "Underbody: Inspect for rust, damage, or signs of accidents",
-      "VIN: Verify VIN matches paperwork and check for tampering",
-      "Test Drive: Drive on various road conditions, test acceleration, braking, steering",
-      "History: Review CarFax or AutoCheck for accidents, title issues, or odometer discrepancies",
-      "Warranty: Check if any factory warranty remains or if extended warranty is available"
-    ];
+    if (selectedCar.transmission) addKeyValue("Transmission", selectedCar.transmission);
+    if (selectedCar.drivetrain) addKeyValue("Drivetrain", selectedCar.drivetrain);
+    if (selectedCar.fuel) addKeyValue("Fuel Type", selectedCar.fuel);
+    if (selectedCar.exteriorColor) addKeyValue("Exterior Color", selectedCar.exteriorColor);
+    if (selectedCar.interiorColor) addKeyValue("Interior Color", selectedCar.interiorColor);
 
-    inspectionChecklist.forEach((item) => {
-      addText(`☐ ${item}`, 10, false);
-      yPosition += 2;
-    });
     yPosition += sectionSpacing;
 
-    // Dealer Warning Signs
-    checkPageBreak(lineHeight * 12);
-    addText("DEALER WARNING SIGNS", 14, true, [220, 38, 38]);
-    yPosition += 3;
+    // ===== VEHICLE HISTORY =====
+    if (selectedCar.history) {
+      addSectionHeader("VEHICLE HISTORY");
 
-    const warningSigns = [
-      "High-pressure sales tactics or creating false urgency",
-      "Refusing to let you take the car to an independent mechanic",
-      "Unwillingness to provide vehicle history report or VIN details",
-      "Asking for large deposits before you've decided to buy",
-      "Unusually low prices that seem too good to be true",
-      "Reluctance to answer questions or provide documentation",
-      "Pushing add-ons or extended warranties aggressively",
-      "Inconsistent information about the car's history or condition",
-      "Poor online reviews or complaints about the dealership",
-      "Rushing you through paperwork or discouraging you from reading contracts"
-    ];
+      if (selectedCar.history.accidentCount !== undefined) {
+        addKeyValue("Accident Reports", selectedCar.history.accidentCount.toString());
+      }
+      if (selectedCar.history.ownerCount !== undefined) {
+        addKeyValue("Number of Owners", selectedCar.history.ownerCount.toString());
+      }
+      if (selectedCar.history.usageType) {
+        addKeyValue("Usage Type", selectedCar.history.usageType);
+      }
+      if (selectedCar.history.oneOwner !== undefined) {
+        addKeyValue("One Owner Vehicle", selectedCar.history.oneOwner ? "Yes" : "No");
+      }
 
-    warningSigns.forEach((sign) => {
-      addText(`⚠ ${sign}`, 10, false);
-      yPosition += 2;
+      yPosition += sectionSpacing;
+    }
+
+    // ===== DEPRECIATION FORECAST =====
+    const depreciationData = calculateDepreciation(
+      selectedCar.price,
+      new Date().getFullYear() - selectedCar.year,
+      selectedCar.baseMsrp
+    );
+
+    addSectionHeader("DEPRECIATION FORECAST");
+
+    addText("Estimated future values based on industry depreciation models:", 10, false);
+    yPosition += 2;
+
+    // Show key years only
+    [1, 3, 5, 10].forEach(year => {
+      const dataPoint = depreciationData.find(d => d.year === year);
+      if (dataPoint) {
+        addKeyValue(`Year ${year}`, `$${dataPoint.value.toLocaleString()}`, 5);
+      }
     });
+
     yPosition += sectionSpacing;
 
-    // Warranty Advice
-    checkPageBreak(lineHeight * 15);
-    addText("WARRANTY ADVICE", 14, true, [37, 99, 235]);
-    yPosition += 3;
+    // ===== BUYING TIPS =====
+    checkPageBreak(40);
+    addSectionHeader("NEGOTIATION TIPS");
 
-    const warrantyAdvice = [
-      "Check if the vehicle is still under factory warranty (typically 3 years/36,000 miles)",
-      "Understand the difference between bumper-to-bumper and powertrain warranties",
-      "Review what's covered and what's excluded in any warranty",
-      "Consider extended warranties carefully - they may not always be worth the cost",
-      "Ask about warranty transferability if you plan to sell the car",
-      "Get warranty terms in writing and read the fine print",
-      "Research the warranty provider's reputation and claims process",
-      "Compare third-party extended warranty options if factory warranty has expired",
-      "Keep all maintenance records to ensure warranty compliance",
-      "Understand that 'as-is' sales typically mean no warranty protection"
+    const tips = [
+      "Research the market value using KBB, Edmunds, and similar listings",
+      "Start negotiations 10-15% below asking price",
+      "Get pre-approved financing to strengthen your position",
+      "Point out any issues noticed during inspection",
+      "Be willing to walk away if price doesn't meet budget",
+      "Negotiate out-the-door price, not just sticker price",
     ];
 
-    warrantyAdvice.forEach((advice, index) => {
-      addText(`${index + 1}. ${advice}`, 10, false);
-      yPosition += 2;
+    tips.forEach((tip, i) => {
+      addText(`${i + 1}. ${tip}`, 9, false);
     });
+
     yPosition += sectionSpacing;
 
-    // Final Summary
-    checkPageBreak(lineHeight * 12);
-    addText("FINAL SUMMARY", 14, true, [37, 99, 235]);
-    yPosition += 3;
+    // ===== INSPECTION CHECKLIST =====
+    checkPageBreak(40);
+    addSectionHeader("INSPECTION CHECKLIST");
 
-    const summary = [
-      `This ${selectedCar.year} ${selectedCar.make} ${selectedCar.model} is listed at $${selectedCar.price.toLocaleString()}.`,
-      `Before making a purchase decision, ensure you:`,
-      `1. Have thoroughly inspected the vehicle or had it inspected by a trusted mechanic`,
-      `2. Verified the vehicle history and confirmed there are no red flags`,
-      `3. Negotiated a fair price based on market research and condition`,
-      `4. Reviewed and understood all warranty options and coverage`,
-      `5. Secured financing (if needed) at competitive rates`,
-      `6. Read all paperwork carefully before signing`,
-      `Remember: Take your time, don't feel pressured, and trust your instincts.`,
-      `If something doesn't feel right, it's okay to walk away.`
+    const checklist = [
+      "Check exterior for dents, scratches, rust, and paint issues",
+      "Inspect tire tread depth and wear patterns",
+      "Test engine for leaks and unusual noises",
+      "Verify transmission shifts smoothly",
+      "Test all electronics, lights, and climate control",
+      "Request vehicle history report (CarFax/AutoCheck)",
+      "Have independent mechanic perform pre-purchase inspection",
     ];
 
-    summary.forEach((item) => {
-      addText(item, 10, false);
-      yPosition += 2;
+    checklist.forEach(item => {
+      addText(`☐ ${item}`, 9, false);
     });
 
-    // Footer
+    // ===== FOOTER ON ALL PAGES =====
     const totalPages = doc.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
@@ -530,15 +619,15 @@ const CarListings: React.FC = () => {
       doc.setFontSize(8);
       doc.setTextColor(128, 128, 128);
       doc.text(
-        `Page ${i} of ${totalPages} - Generated by Car Buying Assistant`,
+        `Page ${i} of ${totalPages} | Generated by CarInsight`,
         pageWidth / 2,
         pageHeight - 10,
         { align: "center" }
       );
     }
 
-    // Save the PDF
-    const fileName = `${selectedCar.year}_${selectedCar.make}_${selectedCar.model}_BuyingGuide.pdf`;
+    // Save PDF
+    const fileName = `${selectedCar.year}_${selectedCar.make}_${selectedCar.model}_Report.pdf`;
     doc.save(fileName);
   };
 
