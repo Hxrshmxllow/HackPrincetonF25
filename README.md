@@ -1,8 +1,8 @@
-# CarInsight 🚗
+# Revvo 🚗
 
 > The world's most honest car dealer.
 
-CarInsight is an intelligent car buying platform that provides real insights, pricing predictions, and expert-level conversations to help you make informed car purchasing decisions. Get personalized car recommendations, insurance estimates, depreciation forecasts, and AI-powered car analysis—all in one place.
+Revvo is an intelligent car buying platform that provides real insights, pricing predictions, and expert-level conversations to help you make informed car purchasing decisions. Get personalized car recommendations, insurance estimates, depreciation forecasts, and AI-powered car analysis—all in one place.
 
 ## ✨ Features
 
