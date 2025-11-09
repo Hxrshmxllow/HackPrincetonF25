@@ -28,9 +28,9 @@ function CarListingsPage() {
         };
 
         const state = "NJ";
-        const budget = profile?.budgetMax || profile?.budgetMin || 50000;
-        const primaryUse = profile?.comfortLevel || "Sedan";
-
+        const budget = 50000;
+        const primaryUse = "Sedan";
+        
         const listings = await fetchListings(state, budget, primaryUse);
         setCars(listings);
       } catch (err) {
@@ -84,7 +84,13 @@ function CarListingsPage() {
         </div>
 
         {loading ? (
-          <p className="loading">Loading car listings...</p>
+            <div className="loading-container">
+                <div className="tire-spinner">
+                <div className="tire"></div>
+                <div className="rim"></div>
+                </div>
+                <p>Finding your perfect ride...</p>
+            </div>
         ) : filteredCars.length === 0 ? (
           <p className="no-results">No cars match your filters.</p>
         ) : (
@@ -96,13 +102,25 @@ function CarListingsPage() {
                 onClick={() => setSelectedCar(car)}
               >
                 <div className="image-wrapper">
-                  <img src={car.image} alt={`${car.make} ${car.model}`} />
+                  <img
+  src={car.image}
+  alt={`${car.make} ${car.model}`}
+  onError={(e) => {
+    e.target.onerror = null; // prevent infinite loop if fallback also fails
+    e.target.src =
+      "https://media.istockphoto.com/id/1429012766/photo/presentation-of-the-new-car.jpg?s=612x612&w=0&k=20&c=2QKAvTCm4UNNs9fS3ESHSfzGe-5qxT2Qv6pNtLAW41U=";
+  }}
+/>
                 </div>
                 <div className="car-info">
                   <h3>
                     {car.year} {car.make} {car.model}
                   </h3>
-                  <p className="price">${car.price.toLocaleString()}</p>
+                  <p className="price">
+  {Number(car.price) > 0
+    ? `$${Number(car.price).toLocaleString()}`
+    : "Contact Dealer for Price"}
+</p>
                   <p className="details">
                     <Gauge size={14} /> {car.mileage.toLocaleString()} mi •{" "}
                     <MapPin size={14} /> {car.location}

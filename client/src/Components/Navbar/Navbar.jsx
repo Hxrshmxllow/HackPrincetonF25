@@ -10,7 +10,7 @@ function NavBar() {
     <nav className="navbar">
       <div className="logo">
         <Car size={28} />
-        <span>CarFacts</span>
+        <span>Revvo</span>
       </div>
 
       <div className="nav-links">

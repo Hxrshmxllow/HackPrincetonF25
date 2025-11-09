@@ -85,7 +85,7 @@ def get_listings_by_filter():
                 f"vehicle.make={make}&"
                 f"vehicle.model={model}&"
                 f"retailListing.state={state}&"
-                f"limit=5"
+                f"limit=4"
             )
 
             if budget:

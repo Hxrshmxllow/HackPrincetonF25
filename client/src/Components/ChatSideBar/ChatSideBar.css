@@ -4,17 +4,17 @@
   right: 0;
   width: 0;
   height: 100%;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
   box-shadow: -4px 0 25px rgba(0, 0, 0, 0.08);
   border-left: 1px solid rgba(0, 0, 0, 0.05);
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   transition: all 0.35s ease;
   opacity: 0;
   z-index: 30;
   border-radius: 0 20px 20px 0;
+  overflow-y: auto; /* ✅ Allow entire sidebar to scroll */
 }
 
 .chat-sidebar.open {
@@ -29,6 +29,10 @@
   justify-content: space-between;
   padding: 1rem 1.25rem;
   border-bottom: 1px solid #e5e7eb;
+  background: white;
+  position: sticky;
+  top: 0;
+  z-index: 2; /* ✅ Keeps header visible while scrolling */
 }
 
 .chat-sidebar-header h3 {
@@ -59,15 +63,16 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 1rem;
+  overflow-y: visible; /* ✅ Prevents double scrollbars */
 }
 
 /* MESSAGES */
 .chat-messages {
   flex: 1;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  overflow-y: visible;
 }
 
 .chat-message {
@@ -96,14 +101,18 @@
 .chat-input-container {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
   padding-top: 1rem;
   border-top: 1px solid #e5e7eb;
+  background: white;
+  position: sticky;
+  bottom: 0;
+  z-index: 2; /* ✅ Keeps input visible while scrolling */
 }
 
 .chat-input {
   flex: 1;
-  padding: 0.75rem 1rem;
+  padding: 0.8rem 1rem;
   border-radius: 10px;
   border: 1px solid #d1d5db;
   font-size: 0.95rem;
@@ -115,28 +124,42 @@
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
+/* ✅ Bigger Send Button */
 .chat-send-btn {
   background: #2563eb;
   color: white;
   border: none;
   border-radius: 50%;
-  width: 42px;
-  height: 42px;
+  width: 50px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background 0.3s ease, transform 0.2s ease;
 }
 
 .chat-send-btn:hover {
   background: #1d4ed8;
+  transform: scale(1.05);
+}
+
+/* ✅ Make the Send Icon Larger */
+.chat-send-btn svg {
+  width: 22px;
+  height: 22px;
 }
 
 /* ANIMATIONS */
 @keyframes fadeInMsg {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* MOBILE */
@@ -148,5 +171,15 @@
     top: 0;
     height: 100%;
     z-index: 100;
+  }
+
+  .chat-send-btn {
+    width: 48px;
+    height: 48px;
+  }
+
+  .chat-send-btn svg {
+    width: 24px;
+    height: 24px;
   }
 }

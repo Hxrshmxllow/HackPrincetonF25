@@ -307,3 +307,92 @@ def get_car_checklist(vehicle_data):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+def get_insurance_breakdown(vehicle_data):
+    """
+    Generate an AI-based insurance factor breakdown for a given vehicle JSON.
+    Returns a structured JSON with multipliers and reasoning.
+    """
+    key = os.getenv("OPENAI_API_KEY")
+    if not key:
+        return jsonify({"error": "Missing OpenAI API key"}), 500
+
+    client = OpenAI(api_key=key)
+
+    if not vehicle_data:
+        return jsonify({"error": "Missing vehicle data"}), 400
+
+    prompt = f"""
+    You are an automotive insurance risk analyst.
+    Given this vehicle JSON:
+    {json.dumps(vehicle_data, indent=2)}
+
+    Return a structured JSON object estimating insurance cost factors.
+    Include numeric multipliers (2 decimals max) and short explanations.
+
+    Respond strictly in JSON with this schema:
+    {{
+      "baseEstimate": number,
+      "finalEstimate": number,
+      "locationMultiplier": number,
+      "makeMultiplier": number,
+      "bodyStyleMultiplier": number,
+      "engineMultiplier": number,
+      "ageMultiplier": number,
+      "mileageMultiplier": number,
+      "accidentMultiplier": number,
+      "explanation": {{
+        "location": string,
+        "make": string,
+        "bodyStyle": string,
+        "engine": string,
+        "age": string,
+        "mileage": string,
+        "accident": string
+      }}
+    }}
+
+    Example:
+    {{
+      "baseEstimate": 1400,
+      "finalEstimate": 1800,
+      "locationMultiplier": 1.10,
+      "makeMultiplier": 1.15,
+      "bodyStyleMultiplier": 1.05,
+      "engineMultiplier": 1.20,
+      "ageMultiplier": 0.95,
+      "mileageMultiplier": 1.05,
+      "accidentMultiplier": 1.25,
+      "explanation": {{
+        "location": "Urban NJ area has higher accident frequency.",
+        "make": "Luxury brand increases repair cost risk.",
+        "bodyStyle": "Sedan has moderate safety score.",
+        "engine": "Turbocharged 3.0L engine increases risk factor.",
+        "age": "Newer cars benefit from improved safety tech.",
+        "mileage": "Moderate mileage slightly increases risk.",
+        "accident": "1 prior accident increases premium."
+      }}
+    }}
+    """
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            temperature=0.3,
+            messages=[
+                {"role": "system", "content": "You are a precise insurance analyst who only outputs clean JSON."},
+                {"role": "user", "content": prompt}
+            ],
+        )
+
+        raw = response.choices[0].message.content.strip()
+        try:
+            clean = raw.replace("```json", "").replace("```", "").strip()
+            data = json.loads(clean)
+        except json.JSONDecodeError:
+            data = {"rawText": raw}
+
+        return data
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

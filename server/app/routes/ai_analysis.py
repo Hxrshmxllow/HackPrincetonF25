@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request, send_file
 import json
 import requests
 import os
-from ..utils.openai import get_car_analysis, get_car_checklist
+from ..utils.openai import get_car_analysis, get_car_checklist, get_insurance_breakdown
 from ..utils.pdf_generator import generate_checklist_pdf
 
 
@@ -72,4 +72,25 @@ def generate_checklist():
 
     except Exception as e:
         print("❌ Checklist generation failed:", e)
+        return jsonify({"error": str(e)}), 500
+    
+@ai_bp.route("/insurance-breakdown", methods=["POST"])
+def insurance_breakdown():
+    try:
+        vehicle_data = request.get_json()
+        if not vehicle_data:
+            return jsonify({"error": "Missing or invalid JSON body"}), 400
+
+        # 1️⃣ Get AI insurance breakdown
+        breakdown = get_insurance_breakdown(vehicle_data)
+        if isinstance(breakdown, tuple):  # error jsonify
+            return breakdown
+
+        return jsonify({
+            "status": "success",
+            "insuranceBreakdown": breakdown
+        }), 200
+
+    except Exception as e:
+        print("❌ Insurance breakdown generation failed:", e)
         return jsonify({"error": str(e)}), 500

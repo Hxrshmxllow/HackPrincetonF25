@@ -73,7 +73,7 @@ function ProfileSetupPage() {
     if (step < 5) setStep(step + 1);
     else {
       localStorage.setItem("profile", JSON.stringify(profile));
-      navigate("/");
+      navigate("/listings");
     }
   };
 
