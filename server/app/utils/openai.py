@@ -121,3 +121,78 @@ def get_car_rating(vehicle_data):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+def chat_about_car(car_data, message_history):
+    """Chat with AI about a specific car using conversation history. Don't include any headers or anything that needs to be formatted. Just be conversational."""
+    key = os.getenv("OPENAI_API_KEY")
+    if not key:
+        return {"error": "Missing OpenAI API key"}
+
+    client = OpenAI(api_key=key)
+
+    # Build system prompt with car information
+    car_info = f"""
+    Car Details:
+    - Make: {car_data.get('make', 'Unknown')}
+    - Model: {car_data.get('model', 'Unknown')}
+    - Year: {car_data.get('year', 'Unknown')}
+    - Price: ${car_data.get('price', 0):,}
+    - Mileage: {car_data.get('mileage', 0):,} miles
+    - Location: {car_data.get('location', 'Unknown')}
+    - Transmission: {car_data.get('transmission', 'N/A')}
+    - Fuel Type: {car_data.get('fuel', 'N/A')}
+    - Exterior Color: {car_data.get('exteriorColor', 'N/A')}
+    - Interior Color: {car_data.get('interiorColor', 'N/A')}
+    - Description: {car_data.get('description', 'N/A')}
+    """
+    
+    if car_data.get('ratings'):
+        car_info += f"""
+    - Overall Rating: {car_data.get('ratings', {}).get('overallRating', 'N/A')}
+    - Deal Rating: {car_data.get('ratings', {}).get('dealRating', 'N/A')}
+    - Fuel Economy Rating: {car_data.get('ratings', {}).get('fuelEconomyRating', 'N/A')}
+    - Maintenance Rating: {car_data.get('ratings', {}).get('maintenanceRating', 'N/A')}
+    - Safety Rating: {car_data.get('ratings', {}).get('safetyRating', 'N/A')}
+    """
+    
+    if car_data.get('history'):
+        car_info += f"""
+    - Accident Count: {car_data.get('history', {}).get('accidentCount', 'N/A')}
+    - Owner Count: {car_data.get('history', {}).get('ownerCount', 'N/A')}
+    - One Owner: {car_data.get('history', {}).get('oneOwner', 'N/A')}
+    """
+
+    system_prompt = f"""You are a helpful and knowledgeable car buying assistant. You have access to detailed information about a specific car listing. 
+    
+    {car_info}
+    
+    Answer questions about this car honestly and helpfully. Provide insights about:
+    - Value and pricing
+    - Reliability and maintenance
+    - Fuel economy
+    - Safety features
+    - Overall quality and owner satisfaction
+    - Whether this car is a good deal
+    - Any concerns or things to watch out for
+    
+    Be conversational, friendly, and provide practical advice. If you don't know something specific, say so rather than guessing."""
+
+    # Build messages array
+    messages = [{"role": "system", "content": system_prompt}]
+    
+    # Add conversation history
+    for msg in message_history:
+        messages.append(msg)
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            temperature=0.7
+        )
+
+        reply = response.choices[0].message.content.strip()
+        return {"reply": reply}
+
+    except Exception as e:
+        return {"error": str(e)}

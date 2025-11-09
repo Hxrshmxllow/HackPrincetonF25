@@ -41,27 +41,28 @@ def clean_listings(data):
 
                     token = os.getenv("AUTO_DEV_KEY")
                     if not token:
-                        return jsonify({"error": "Missing AUTO_DEV_KEY environment variable"}), 500
-
-                    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-                    url = f'https://api.auto.dev/photos/{vin}'
-
-                    try:
-                        resp = requests.get(url, headers=headers, timeout=2)
-                        if resp.status_code == 200:
-                            listings_data = resp.json()
-                            photo_data = listings_data.get("data", [])
-                            photo_retail = photo_data.get("retail", {})
-                            if photo_retail is not None:
-                                images = photo_retail
-                            else:
-                                images = retail.get("primaryImage")
-                        else:
-                            print(f"❌ Auto.dev error {resp.status_code} for {vin} images")
-                            images = retail.get("primaryImage")
-                    except Exception as e:
-                        print(f"❌ Auto.dev error {resp.status_code} for {vin} images")
+                        print(f"⚠️ Missing AUTO_DEV_KEY, using default image for {vin}")
                         images = retail.get("primaryImage")
+                    else:
+                        headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+                        url = f'https://api.auto.dev/photos/{vin}'
+
+                        try:
+                            resp = requests.get(url, headers=headers, timeout=2)
+                            if resp.status_code == 200:
+                                listings_data = resp.json()
+                                photo_data = listings_data.get("data", [])
+                                photo_retail = photo_data.get("retail", {})
+                                if photo_retail is not None:
+                                    images = photo_retail
+                                else:
+                                    images = retail.get("primaryImage")
+                            else:
+                                print(f"❌ Auto.dev error {resp.status_code} for {vin} images")
+                                images = retail.get("primaryImage")
+                        except Exception as e:
+                            print(f"❌ Auto.dev error for {vin} images: {e}")
+                            images = retail.get("primaryImage")
 
                     simplified_results[vin] = {
                          **(
@@ -107,8 +108,14 @@ def clean_listings(data):
                             "year": vehicle.get("year"),
                         }
                     }
-                    simplified_results[vin]["ratings"] = get_car_rating(simplified_results[vin])
-                    simplified_results[vin]["insurance"] = estimate_annual_insurance(simplified_results[vin])
+                    # Get ratings - handle both dict and tuple responses
+                    rating_result = get_car_rating(simplified_results[vin])
+                    if isinstance(rating_result, tuple):
+                        # Error case: (response, status_code)
+                        print(f"⚠️ Failed to get rating for {vin}")
+                        simplified_results[vin]["ratings"] = {}
+                    else:
+                        simplified_results[vin]["ratings"] = rating_result
                 except Exception as e:
                     import traceback
                     print(f"❌ Error while processing VIN or listing: {e}")

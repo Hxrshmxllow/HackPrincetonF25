@@ -12,7 +12,12 @@ def create_app():
 
     CORS(
         app,
-        origins=["http://localhost:5173", "http://127.0.0.1:5173"], #add frontend url once hosted
+        origins=[
+            "http://localhost:5173", 
+            "http://localhost:4173",
+            "http://127.0.0.1:5173",
+            "http://127.0.0.1:4173"
+        ], #add frontend url once hosted
         supports_credentials=True,
         allow_headers=["Content-Type", "Authorization"],
         expose_headers=["Authorization"],
